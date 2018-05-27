@@ -1,0 +1,240 @@
+{
+  "cdhVersion" : "5.14.2",
+  "displayName" : "Prov",
+  "cmVersion" : "5.14.2",
+  "repositories" : [ 
+    "https://archive.cloudera.com/cdh5/parcels/{latest_supported}/", 
+    "https://archive.cloudera.com//kafka/parcels/2.1.2/", 
+    "http://archive.cloudera.com/spark2/parcels/2.3.0.cloudera2/" 
+  ],
+  "products" : [ {
+    "version" : "2.1.2-1.2.1.2.p0.6",
+    "product" : "KAFKA"
+  }, {
+    "version" : "5.14.2-1.cdh5.14.2.p0.3",
+    "product" : "CDH"
+  }, {
+    "version" : "2.3.0.cloudera2-1.cdh5.13.3.p0.316101",
+    "product" : "SPARK2"
+  } ],
+  "services" : [ {
+    "refName" : "spark2_on_yarn",
+    "serviceType" : "SPARK2_ON_YARN",
+    "serviceConfigs" : [ {
+      "name" : "yarn_service",
+      "ref" : "yarn"
+    } ],
+    "roleConfigGroups" : [ {
+      "refName" : "spark2_on_yarn-GATEWAY-BASE",
+      "roleType" : "GATEWAY",
+      "configs" : [ {
+        "name" : "spark_dynamic_allocation_enabled",
+        "value" : "false"
+      }, {
+        "name" : "spark_dynamic_allocation_max_executors",
+        "value" : "4"
+      }, {
+        "name" : "spark_dynamic_allocation_min_executors",
+        "value" : "1"
+      }, {
+        "name" : "spark_dynamic_allocation_initial_executors",
+        "value" : "1"
+      }, {
+        "name" : "spark_kafka_version",
+        "value" : "0.10"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "spark2_on_yarn-SPARK2_YARN_HISTORY_SERVER-BASE",
+      "roleType" : "SPARK2_YARN_HISTORY_SERVER",
+      "configs" : [ {
+        "name" : "event_log_cleaner_max_age",
+        "value" : "86400"
+      } ],
+      "base" : true
+    } ]
+  }, {
+    "refName" : "yarn",
+    "serviceType" : "YARN",
+    "serviceConfigs" : [ {
+      "name" : "zookeeper_service",
+      "ref" : "zookeeper",
+      "autoConfig" : false
+    }, {
+      "name" : "hdfs_service",
+      "ref" : "hdfs",
+      "autoConfig" : false
+    }, {
+      "name" : "yarn_log_aggregation_retain_seconds",
+      "value" : "86400"
+    } ],
+    "roleConfigGroups" : [ {
+      "refName" : "yarn-RESOURCEMANAGER-BASE",
+      "roleType" : "RESOURCEMANAGER",
+      "configs" : [ {
+        "name" : "yarn_scheduler_maximum_allocation_vcores",
+        "value" : "8",
+        "autoConfig" : false
+      }, {
+        "name" : "yarn_scheduler_maximum_allocation_mb",
+        "value" : "8192"
+      } ],
+      "base" : true
+    }, {
+      "refName" : "yarn-JOBHISTORY-BASE",
+      "roleType" : "JOBHISTORY",
+      "base" : true
+    }, {
+      "refName" : "yarn-NODEMANAGER-BASE",
+      "roleType" : "NODEMANAGER",
+      "configs" : [ {
+        "name" : "yarn_nodemanager_resource_memory_mb",
+        "value" : "27648"
+      }, {
+        "name" : "yarn_nodemanager_heartbeat_interval_ms",
+        "value" : "100",
+        "autoConfig" : false
+      }, {
+        "name" : "yarn_nodemanager_local_dirs",
+        "variable" : "yarn-NODEMANAGER-BASE-yarn_nodemanager_local_dirs",
+        "autoConfig" : false
+      }, {
+        "name" : "yarn_nodemanager_log_dirs",
+        "variable" : "yarn-NODEMANAGER-BASE-yarn_nodemanager_log_dirs",
+        "autoConfig" : false
+      }, {
+        "name" : "yarn_nodemanager_resource_cpu_vcores",
+        "value" : "7"
+      } ],
+      "base" : true
+    } ]
+  }, {
+    "refName" : "kafka",
+    "serviceType" : "KAFKA",
+    "serviceConfigs" : [ {
+      "name" : "zookeeper_service",
+      "ref" : "zookeeper"
+    }, {
+      "name" : "num.partitions",
+      "value" : "2"
+    } ],
+    "roleConfigGroups" : [ {
+      "refName" : "kafka-GATEWAY-BASE",
+      "roleType" : "GATEWAY",
+      "base" : true
+    }, {
+      "refName" : "kafka-KAFKA_BROKER-BASE",
+      "roleType" : "KAFKA_BROKER",
+      "configs" : [ {
+        "name" : "broker_max_heap_size",
+        "value" : "256"
+      }, {
+        "name" : "log.dirs",
+        "variable" : "kafka-KAFKA_BROKER-BASE-log.dirs"
+      } ],
+      "base" : true
+    }]
+  }, {
+    "refName" : "hdfs",
+    "serviceType" : "HDFS",
+    "serviceConfigs" : [ {
+      "name" : "zookeeper_service",
+      "ref" : "zookeeper",
+      "autoConfig" : false
+    } ],
+    "roleConfigGroups" : [ {
+      "refName" : "hdfs-DATANODE-BASE",
+      "roleType" : "DATANODE",
+      "configs" : [ {
+        "name" : "dfs_data_dir_list",
+        "value" : "/cm/dfs/dn",
+        "autoConfig" : false
+      } ,
+      {
+        "name" : "dfs_datanode_failed_volumes_tolerated",
+        "value" : "0",
+        "autoConfig" : false
+      }
+
+      ],
+      "base" : true
+    }, {
+      "refName" : "hdfs-NAMENODE-BASE",
+      "roleType" : "NAMENODE",
+      "configs" : [ {
+        "name" : "dfs_namenode_servicerpc_address",
+        "value" : "8022",
+        "autoConfig" : false
+      }, {
+        "name" : "dfs_name_dir_list",
+        "variable" : "hdfs-NAMENODE-BASE-dfs_name_dir_list",
+        "autoConfig" : false
+      } ],
+      "base" : true
+    }, {
+      "refName" : "hdfs-BALANCER-BASE",
+      "roleType" : "BALANCER",
+      "base" : true
+    }, {
+      "refName" : "hdfs-SECONDARYNAMENODE-BASE",
+      "roleType" : "SECONDARYNAMENODE",
+      "configs" : [ {
+        "name" : "fs_checkpoint_dir_list",
+        "variable" : "hdfs-SECONDARYNAMENODE-BASE-fs_checkpoint_dir_list",
+        "autoConfig" : false
+      } ],
+      "base" : true
+    }, {
+      "refName" : "hdfs-HTTPFS-BASE",
+      "roleType" : "HTTPFS",
+      "base" : true
+    }, {
+      "refName" : "hdfs-NFSGATEWAY-BASE",
+      "roleType" : "NFSGATEWAY",
+      "base" : true
+    } ]
+  }, {
+    "refName" : "zookeeper",
+    "serviceType" : "ZOOKEEPER",
+    "roleConfigGroups" : [ {
+      "refName" : "zookeeper-SERVER-BASE",
+      "roleType" : "SERVER",
+      "base" : true
+    } ]
+  } ],
+  "hostTemplates" : [ {
+    "refName" : "HostTemplate-0",
+    "cardinality" : 2,
+    "roleConfigGroupsRefNames" : [ "hdfs-DATANODE-BASE", "kafka-GATEWAY-BASE", "kafka-KAFKA_BROKER-BASE", "spark2_on_yarn-GATEWAY-BASE", "yarn-NODEMANAGER-BASE", "zookeeper-SERVER-BASE" ]
+  }, {
+    "refName" : "HostTemplate-1",
+    "cardinality" : 1,
+    "roleConfigGroupsRefNames" : [ "hdfs-BALANCER-BASE", "hdfs-DATANODE-BASE", "hdfs-HTTPFS-BASE", "hdfs-NAMENODE-BASE", "hdfs-NFSGATEWAY-BASE", "hdfs-SECONDARYNAMENODE-BASE", "kafka-GATEWAY-BASE", "spark2_on_yarn-GATEWAY-BASE", "spark2_on_yarn-SPARK2_YARN_HISTORY_SERVER-BASE", "yarn-JOBHISTORY-BASE", "yarn-RESOURCEMANAGER-BASE" ]
+  } ],
+  "instantiator" : {
+    "clusterName" : "Prov",
+    "hosts" : [ {
+  "hostName" : " 1 ",
+      "hostTemplateRefName" : "HostTemplate-1"
+    }, {
+   "hostNameRange" : " 2,3 ",
+      "hostTemplateRefName" : "HostTemplate-0"
+    } ],
+    "variables" : [ {
+      "name" : "hdfs-NAMENODE-BASE-dfs_name_dir_list",
+      "value" : "/cm/dfs/nn"
+    }, {
+      "name" : "hdfs-SECONDARYNAMENODE-BASE-fs_checkpoint_dir_list",
+      "value" : "/cm/dfs/snn"
+    }, {
+      "name" : "kafka-KAFKA_BROKER-BASE-log.dirs",
+      "value" : "/cm/kafka/data"
+    }, {
+      "name" : "yarn-NODEMANAGER-BASE-yarn_nodemanager_local_dirs",
+      "value" : "/cm/yarn/nm"
+    }, {
+      "name" : "yarn-NODEMANAGER-BASE-yarn_nodemanager_log_dirs",
+      "value" : "/cm/yarn/container-logs"
+    } ]
+  }
+}
